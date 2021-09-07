@@ -32,9 +32,10 @@ class Player:
         if self.on_coin():
             self.eat_coin()
 
-    def draw(self):
+    def draw(self,screen):
         pygame.draw.circle(self.app.screen, PLAYER_COLOUR, (int(self.pix_pos.x),
                                                             int(self.pix_pos.y)), self.app.cell_width // 2 - 2)
+
         # # Drawing player lives
         # for x in range(self.lives):
         #     pygame.draw.circle(self.app.screen, PLAYER_COLOUR, (30 + 20*x, HEIGHT - 15), 7)

@@ -21,20 +21,20 @@ class App:
         self.maze = pygame.transform.scale(pygame.image.load('maze2.png'), (MAZE_WIDTH, MAZE_HEIGHT))
         self.cell_width = MAZE_WIDTH // 28
         self.cell_height = MAZE_HEIGHT // 30
-        self.walls=[]
-        self.coins=[]
+        self.walls = []
+        self.coins = []
         self.load()
 
         self.player = Player(self, vec(1, 1))
 
     def load(self):
-        with open('walls.txt',mode='r') as file:
-            for xid,lines in enumerate(file):
-                for yid,char in enumerate(lines):
-                    if char=="1":
-                        self.walls.append(vec(yid,xid))
-                    elif char=="C":
-                        self.coins.append(vec(yid,xid))
+        with open('walls.txt', mode='r') as file:
+            for xid, lines in enumerate(file):
+                for yid, char in enumerate(lines):
+                    if char == "1":
+                        self.walls.append(vec(yid, xid))
+                    elif char == "C":
+                        self.coins.append(vec(yid, xid))
 
     def run(self):
         while self.running:
@@ -68,8 +68,8 @@ class App:
     def draw_coins(self):
         for coin in self.coins:
             pygame.draw.circle(self.screen, (124, 123, 7),
-                               (int(coin.x*self.cell_width)+self.cell_width//2+25,
-                                int(coin.y*self.cell_height)+self.cell_height//2+25), 5)
+                               (int(coin.x * self.cell_width) + self.cell_width // 2 + 25,
+                                int(coin.y * self.cell_height) + self.cell_height // 2 + 25), 5)
 
     def intro_draw(self):
         self.screen.fill((0, 0, 0))
@@ -97,22 +97,13 @@ class App:
         self.player.update()
 
     def play_draw(self):
+        self.screen.fill(BLACK)
         self.screen.blit(self.maze, (25, 25))
-        # self.draw_grid()
-        print(self.player.current_score)
-        self.draw_text('Current score: {}'.format(self.player.current_score), self.screen, [10, 0], 18, (255, 255, 255),'arial black')
-        self.player.draw()
+        self.draw_text('Current score: {}'.format(self.player.current_score), self.screen, [60, 0], 18, (255, 255, 255),
+                       'arial black')
+        self.player.draw(self.screen)
         self.draw_coins()
         pygame.display.update()
-
-    def draw_grid(self):
-
-        for x in range(WIDTH // self.cell_width + 1):
-            pygame.draw.line(self.maze, (136, 136, 136), (x * self.cell_width, 0), (x * self.cell_width, HEIGHT))
-        for x in range(HEIGHT // self.cell_width):
-            pygame.draw.line(self.maze, (136, 136, 136), (0, x * self.cell_height), (WIDTH, x * self.cell_height))
-        # for wall in self.walls:
-        #     pygame.draw.rect(self.maze,(112,55,163),(wall.x*self.cell_width,wall.y*self.cell_height,self.cell_width,self.cell_height))
 
     def draw_text(self, words, screen, pos, size, colour, font_name, centered=False):
         font = pygame.font.SysFont(font_name, size)
