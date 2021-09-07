@@ -1,0 +1,1 @@
+WIDTH, HEIGHT = 610, 670
