@@ -13,7 +13,7 @@ class Enemy:
         self.radius = int(self.app.cell_width // 2.3)
         self.direction = vec(0, 0)
         self.target = None
-        self.speed = 1
+        self.speed = 2
 
     def update(self):
         self.target = self.set_target()
@@ -30,8 +30,6 @@ class Enemy:
     def draw(self):
         pygame.draw.circle(self.app.screen, RED,
                            (int(self.pix_pos.x), int(self.pix_pos.y)), self.radius)
-
-
 
     def set_target(self):
 
@@ -55,7 +53,6 @@ class Enemy:
 
     def move(self):
         self.direction = self.get_random_direction()
-
 
     def get_random_direction(self):
         while True:

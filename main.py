@@ -58,6 +58,10 @@ class App:
                 self.play_events()
                 self.play_update()
                 self.play_draw()
+            elif self.state == 'game over':
+                self.game_over_events()
+                self.game_over_update()
+                self.game_over_draw()
             else:
                 self.running = False
             self.clock.tick(60)
@@ -74,7 +78,7 @@ class App:
         self.player.grid_pos = vec(self.player.starting_pos)
         self.player.pix_pos = self.player.get_pix_pos()
         self.player.direction *= 0
-        for enemy in self.enemies:
+        for enemy in self.enemy:
             enemy.grid_pos = vec(enemy.starting_pos)
             enemy.pix_pos = enemy.get_pix_pos()
             enemy.direction *= 0
@@ -168,6 +172,26 @@ class App:
             pos[0] = pos[0] - text_size[0] // 2
             pos[1] = pos[1] - text_size[1] // 2
         screen.blit(text, pos)
+
+    def game_over_events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if self.button1.collidepoint(pygame.mouse.get_pos()):
+                    self.reset()
+                elif self.button2.collidepoint(pygame.mouse.get_pos()):
+                    pygame.quit()
+
+    def game_over_update(self):
+        pass
+
+    def game_over_draw(self):
+        self.screen.fill(BLACK)
+        self.draw_text("GAME OVER", self.screen, [WIDTH//2, 100],  52, RED, "arial", centered=True)
+        self.button1 = button(self.screen, (WIDTH // 2 - 50, WIDTH // 2), "Play again")
+        self.button2 = button(self.screen, (WIDTH // 2 - 50, HEIGHT // 2 + 50), "Quit")
+        pygame.display.update()
 
 
 if __name__ == '__main__':
