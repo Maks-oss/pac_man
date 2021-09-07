@@ -1,8 +1,9 @@
 import sys
-from utils import *
+
 import pygame
 
 from buttons import button
+from utils import *
 
 pygame.init()
 vec = pygame.math.Vector2
@@ -16,11 +17,9 @@ class App:
         self.clock = pygame.time.Clock()
         self.running = True
         self.state = 'intro'
-        self.maze = pygame.transform.scale(pygame.image.load('maze2.png'), (WIDTH, HEIGHT))
-        self.cell_width=WIDTH//28
-        self.cell_height=HEIGHT//30
-
-
+        self.maze = pygame.transform.scale(pygame.image.load('maze2.png'), (MAZE_WIDTH, MAZE_HEIGHT))
+        self.cell_width = MAZE_WIDTH // 28
+        self.cell_height = MAZE_HEIGHT // 30
 
     def run(self):
         while self.running:
@@ -54,9 +53,9 @@ class App:
     def intro_draw(self):
         self.screen.fill((0, 0, 0))
         self.draw_text('PAC MAN', self.screen, [
-            WIDTH//2, HEIGHT//2-100], 36, (170, 132, 58), 'arial black', centered=True)
-        self.button1 = button(self.screen, (WIDTH//2-50, WIDTH//2), "Start game")
-        self.button2 = button(self.screen, (WIDTH//2-50, HEIGHT//2+50), "Quit game")
+            WIDTH // 2, HEIGHT // 2 - 100], 36, (170, 132, 58), 'arial black', centered=True)
+        self.button1 = button(self.screen, (WIDTH // 2 - 50, WIDTH // 2), "Start game")
+        self.button2 = button(self.screen, (WIDTH // 2 - 50, HEIGHT // 2 + 50), "Quit game")
         pygame.display.update()
 
     def play_events(self):
@@ -68,16 +67,17 @@ class App:
         pass
 
     def play_draw(self):
-        self.screen.blit(self.maze, (0, 0))
+        self.screen.blit(self.maze, (25, 25))
         self.draw_grid()
+        self.draw_text('Current score: {}'.format(0), self.screen, (10, 0), 16, (255, 255, 255), 'arial black')
         pygame.display.update()
 
     def draw_grid(self):
-        print(self.cell_width,self.cell_height)
-        for x in range(WIDTH//self.cell_width+1):
-            pygame.draw.line(self.screen,(136,136,136),(x*self.cell_width,0),(x*self.cell_width,HEIGHT))
-        for x in range(HEIGHT//self.cell_width):
-            pygame.draw.line(self.screen,(136,136,136),(0,x*self.cell_height),(WIDTH,x*self.cell_height))
+        # print(self.cell_width,self.cell_height)
+        for x in range(WIDTH // self.cell_width + 1):
+            pygame.draw.line(self.maze, (136, 136, 136), (x * self.cell_width, 0), (x * self.cell_width, HEIGHT))
+        for x in range(HEIGHT // self.cell_width):
+            pygame.draw.line(self.maze, (136, 136, 136), (0, x * self.cell_height), (WIDTH, x * self.cell_height))
 
     def draw_text(self, words, screen, pos, size, colour, font_name, centered=False):
         font = pygame.font.SysFont(font_name, size)
