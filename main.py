@@ -1,12 +1,7 @@
 import sys
 
-import pygame
-
-from buttons import button
-from enemy import Enemy
-from utils import *
-from player import Player
-from game_state import *
+from gamestates.game_state import *
+from gamestates.intro_state import Intro
 
 pygame.init()
 vec = pygame.math.Vector2

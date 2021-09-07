@@ -9,6 +9,8 @@ class Player(pygame.sprite.Sprite):
     def __init__(self, app, pos):
         self.app = app
         pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load('assets/pac.png').convert()
+        self.image = pygame.transform.scale(self.image, (self.app.cell_width, self.app.cell_height))
         self.grid_pos = pos
         self.starting_pos = [pos[0], pos[1]]
         self.pix_pos = self.get_pix_pos()
@@ -18,7 +20,6 @@ class Player(pygame.sprite.Sprite):
         self.current_score = 0
         self.speed = 1
         self.lives = 1
-
 
     def update(self):
         if self.able_to_move:
@@ -36,11 +37,11 @@ class Player(pygame.sprite.Sprite):
             self.eat_coin()
 
     def draw(self, screen):
-        pygame.draw.circle(self.app.screen, PLAYER_COLOUR, (int(self.pix_pos.x),
-                                                            int(self.pix_pos.y)), self.app.cell_width // 2 - 2)
+        screen.blit(self.image, (self.pix_pos.x - 10,
+                                 self.pix_pos.y - 10))
 
         for x in range(self.lives):
-            pygame.draw.circle(self.app.screen, PLAYER_COLOUR, (30 + 20*x, HEIGHT - 15), 7)
+            pygame.draw.circle(self.app.screen, PLAYER_COLOUR, (30 + 20 * x, HEIGHT - 15), 7)
 
     def on_coin(self):
         if self.grid_pos in self.app.coins:

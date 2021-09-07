@@ -4,9 +4,12 @@ import random
 from utils import *
 
 
-class Enemy:
+class Enemy(pygame.sprite.Sprite):
     def __init__(self, app, pos):
         self.app = app
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load('assets/blinky.png').convert()
+        self.image=pygame.transform.scale(self.image, (self.app.cell_width , self.app.cell_height ))
         self.grid_pos = pos
         self.starting_pos = [pos[0], pos[1]]
         self.pix_pos = self.get_pix_pos()
@@ -27,9 +30,9 @@ class Enemy:
         self.grid_pos[1] = (self.pix_pos[1] - 50 +
                             self.app.cell_height // 2) // self.app.cell_height + 1
 
-    def draw(self):
-        pygame.draw.circle(self.app.screen, RED,
-                           (int(self.pix_pos.x), int(self.pix_pos.y)), self.radius)
+    def draw(self,screen):
+        screen.blit(self.image, (self.pix_pos.x-10,
+                                 self.pix_pos.y-10))
 
     def set_target(self):
 
