@@ -12,6 +12,8 @@ class Play(GameState):
             if event.type == pygame.QUIT:
                 self.running = False
             if event.type == pygame.KEYDOWN:
+                if event.key==pygame.K_z:
+                    self.player.change_algorithm()
                 if event.key == pygame.K_LEFT:
                     self.player.move(vec(-1, 0))
                 if event.key == pygame.K_RIGHT:
@@ -28,6 +30,16 @@ class Play(GameState):
         for enemy in self.enemies:
             if enemy.grid_pos == self.player.grid_pos:
                 self.remove_life()
+        # for enemy in self.enemies:
+        #     for p in enemy.BFS(enemy.grid_pos,self.player.grid_pos):
+        #         pygame.draw.rect(self.maze, enemy.color, (p[0] * self.cell_width, p[1] * self.cell_height,
+        #                                           self.cell_width//2, self.cell_height//2))
+
+    def draw_bfs(self):
+        for enemy in self.enemies:
+            for p in enemy.BFS(enemy.grid_pos, self.player.grid_pos):
+                pygame.draw.rect(self.maze, enemy.color, (p[0] * self.cell_width, p[1] * self.cell_height,
+                                                          self.cell_width // 2, self.cell_height // 2))
 
     def draw_coins(self):
         for coin in self.coins:
@@ -52,6 +64,8 @@ class Play(GameState):
         self.screen.fill(BLACK)
         self.screen.blit(self.maze, (25, 25))
         self.draw_text('Current score: {}'.format(self.player.current_score), self.screen, [60, 0], 18, (255, 255, 255),
+                       'arial black')
+        self.draw_text('Current algorithm: {}'.format(self.player.current_alg+" "+str(self.player.current_time)), self.screen, [300, 0], 18, (255, 255, 255),
                        'arial black')
         self.player.draw(self.screen)
         self.draw_coins()

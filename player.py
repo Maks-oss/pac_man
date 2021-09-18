@@ -1,7 +1,7 @@
 import pygame
 
 from utils import *
-
+import time
 vec = pygame.math.Vector2
 
 
@@ -12,6 +12,10 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.image.load('assets/pac.png').convert()
         self.image = pygame.transform.scale(self.image, (self.app.cell_width, self.app.cell_height))
         self.grid_pos = pos
+        self.old_path = []
+        self.current_alg = 'DFS'
+        self.current_time = 0
+        self.previous_grid_pos = pos
         self.starting_pos = [pos[0], pos[1]]
         self.pix_pos = self.get_pix_pos()
         self.direction = vec(1, 0)
@@ -33,8 +37,26 @@ class Player(pygame.sprite.Sprite):
                             self.app.cell_width // 2) // self.app.cell_width + 1
         self.grid_pos[1] = (self.pix_pos[1] - 50 +
                             self.app.cell_height // 2) // self.app.cell_height + 1
+
+        self.show_algorithm()
         if self.on_coin():
             self.eat_coin()
+
+    def show_algorithm(self):
+        if self.old_path:
+            for p in self.old_path:
+                pygame.draw.rect(self.app.maze, BLACK, p)
+            self.old_path = []
+        if self.current_alg == 'DFS':
+            start = time.time()
+            self.draw_dfs()
+            end = time.time()
+            self.current_time=end-start
+        elif self.current_alg == 'BFS':
+            start = time.time()
+            self.draw_bfs()
+            end = time.time()
+            self.current_time=end-start
 
     def draw(self, screen):
         screen.blit(self.image, (self.pix_pos.x - 10,
@@ -57,8 +79,30 @@ class Player(pygame.sprite.Sprite):
         self.app.coins.remove(self.grid_pos)
         self.current_score += 1
 
+    def change_algorithm(self):
+        if self.current_alg == 'DFS':
+            self.current_alg = 'BFS'
+        elif self.current_alg == 'BFS':
+            self.current_alg = 'DFS'
+
     def move(self, direction):
         self.stored_direction = direction
+
+    def draw_bfs(self):
+        for enemy in self.app.enemies:
+            for p in enemy.BFS(self.grid_pos, enemy.grid_pos):
+                self.old_path.append((p[0] * self.app.cell_width, p[1] * self.app.cell_height,
+                                      self.app.cell_width // 2, self.app.cell_height // 2))
+                pygame.draw.rect(self.app.maze, enemy.color, (p[0] * self.app.cell_width, p[1] * self.app.cell_height,
+                                                              self.app.cell_width // 2, self.app.cell_height // 2))
+
+    def draw_dfs(self):
+        for enemy in self.app.enemies:
+            for p in enemy.DFS(self.grid_pos, enemy.grid_pos):
+                self.old_path.append((p[0] * self.app.cell_width, p[1] * self.app.cell_height,
+                                      self.app.cell_width // 2, self.app.cell_height // 2))
+                pygame.draw.rect(self.app.maze, enemy.color, (p[0] * self.app.cell_width, p[1] * self.app.cell_height,
+                                                              self.app.cell_width // 2, self.app.cell_height // 2))
 
     def get_pix_pos(self):
         return vec((self.grid_pos[0] * self.app.cell_width) + 25 + self.app.cell_width // 2,
@@ -74,6 +118,7 @@ class Player(pygame.sprite.Sprite):
                 return True
 
     def can_move(self):
+
         for wall in self.app.walls:
             if vec(self.grid_pos + self.direction) == wall:
                 return False
