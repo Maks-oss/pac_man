@@ -2,6 +2,7 @@ import pygame
 
 from utils import *
 import time
+
 vec = pygame.math.Vector2
 
 
@@ -48,15 +49,11 @@ class Player(pygame.sprite.Sprite):
                 pygame.draw.rect(self.app.maze, BLACK, p)
             self.old_path = []
         if self.current_alg == 'DFS':
-            start = time.time()
             self.draw_dfs()
-            end = time.time()
-            self.current_time=end-start
         elif self.current_alg == 'BFS':
-            start = time.time()
             self.draw_bfs()
-            end = time.time()
-            self.current_time=end-start
+        elif self.current_alg == 'UCS':
+            self.draw_ucs()
 
     def draw(self, screen):
         screen.blit(self.image, (self.pix_pos.x - 10,
@@ -83,6 +80,8 @@ class Player(pygame.sprite.Sprite):
         if self.current_alg == 'DFS':
             self.current_alg = 'BFS'
         elif self.current_alg == 'BFS':
+            self.current_alg = 'UCS'
+        elif self.current_alg == 'UCS':
             self.current_alg = 'DFS'
 
     def move(self, direction):
@@ -90,7 +89,10 @@ class Player(pygame.sprite.Sprite):
 
     def draw_bfs(self):
         for enemy in self.app.enemies:
+            start = time.time()
             for p in enemy.BFS(self.grid_pos, enemy.grid_pos):
+                end = time.time()
+                self.current_time = (end - start)*1000.0
                 self.old_path.append((p[0] * self.app.cell_width, p[1] * self.app.cell_height,
                                       self.app.cell_width // 2, self.app.cell_height // 2))
                 pygame.draw.rect(self.app.maze, enemy.color, (p[0] * self.app.cell_width, p[1] * self.app.cell_height,
@@ -98,12 +100,24 @@ class Player(pygame.sprite.Sprite):
 
     def draw_dfs(self):
         for enemy in self.app.enemies:
+            start = time.time()
             for p in enemy.DFS(self.grid_pos, enemy.grid_pos):
+                end = time.time()
+                self.current_time = (end - start)*1000.0
                 self.old_path.append((p[0] * self.app.cell_width, p[1] * self.app.cell_height,
                                       self.app.cell_width // 2, self.app.cell_height // 2))
                 pygame.draw.rect(self.app.maze, enemy.color, (p[0] * self.app.cell_width, p[1] * self.app.cell_height,
                                                               self.app.cell_width // 2, self.app.cell_height // 2))
-
+    def draw_ucs(self):
+        for enemy in self.app.enemies:
+            start = time.time()
+            for p in enemy.UCS(self.grid_pos, enemy.grid_pos):
+                end = time.time()
+                self.current_time = (end - start)*1000.0
+                self.old_path.append((p[0] * self.app.cell_width, p[1] * self.app.cell_height,
+                                      self.app.cell_width // 2, self.app.cell_height // 2))
+                pygame.draw.rect(self.app.maze, enemy.color, (p[0] * self.app.cell_width, p[1] * self.app.cell_height,
+                                                              self.app.cell_width // 2, self.app.cell_height // 2))
     def get_pix_pos(self):
         return vec((self.grid_pos[0] * self.app.cell_width) + 25 + self.app.cell_width // 2,
                    (self.grid_pos[1] * self.app.cell_height) +

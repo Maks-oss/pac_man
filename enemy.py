@@ -1,4 +1,5 @@
 import random
+from queue import PriorityQueue
 
 import pygame
 
@@ -84,37 +85,38 @@ class Enemy(pygame.sprite.Sprite):
                    (self.grid_pos[1] * self.app.cell_height) + 25 +
                    self.app.cell_height // 2)
 
-    # def BFS(self, start, target):
-    #     grid = [[0 for x in range(28)] for x in range(30)]
-    #     for cell in self.app.walls:
-    #         if cell.x < 28 and cell.y < 30:
-    #             grid[int(cell.y)][int(cell.x)] = 1
-    #     queue = [start]
-    #     path = []
-    #     visited = []
-    #     while queue:
-    #         current = queue[0]
-    #         queue.remove(queue[0])
-    #         visited.append(current)
-    #         if current == target:
-    #             break
-    #         else:
-    #             neighbours = [[0, -1], [1, 0], [0, 1], [-1, 0]]
-    #             for neighbour in neighbours:
-    #                 if neighbour[0] + current[0] >= 0 and neighbour[0] + current[0] < len(grid[0]):
-    #                     if neighbour[1] + current[1] >= 0 and neighbour[1] + current[1] < len(grid):
-    #                         next_cell = [int(neighbour[0] + current[0]), int(neighbour[1] + current[1])]
-    #                         if next_cell not in visited:
-    #                             if grid[int(next_cell[1])][next_cell[0]] != 1:
-    #                                 queue.append(next_cell)
-    #                                 path.append({"Current": current, "Next": next_cell})
-    #     shortest = [target]
-    #     while target != start:
-    #         for step in path:
-    #             if step["Next"] == target:
-    #                 target = step["Current"]
-    #                 shortest.insert(0, step["Current"])
-    #     return shortest
+    def UCS(self,start,target):
+        grid = [[0 for x in range(28)] for x in range(30)]
+        for cell in self.app.walls:
+            if cell.x < 28 and cell.y < 30:
+                grid[int(cell.y)][int(cell.x)] = 1
+        queue = PriorityQueue()
+        queue.put((0, [start]))
+        visited=[]
+        # iterate over the items in the queue
+        while not queue.empty():
+            pair = queue.get()
+            current = pair[1][-1]
+            cost=pair[0]
+            if current == target:
+                return pair[1]
+            neighbours = [[int(current[0] + 1), int(current[1])],
+                          [int(current[0] - 1), int(current[1])],
+                          [int(current[0]), int(current[1] + 1)],
+                          [int(current[0]), int(current[1] - 1)]]
+            for neighbour in neighbours:
+                if 0 <= neighbour[0] < len(grid[0]):
+                    if 0 <= neighbour[1] < len(grid):
+                        next_cell = [int(neighbour[0]), int(neighbour[1])]
+                        if grid[int(next_cell[1])][next_cell[0]] != 1 and next_cell not in visited:
+                            visited.append(next_cell)
+                            temp = pair[1][:]
+                            temp.append(next_cell)
+                            queue.put((cost+self.cost_function(next_cell,target), temp))
+
+    def cost_function(self,point, end):
+        return pow(point[0] - end[0], 2) + pow(point[1] - end[1], 2)
+
     def BFS(self, start, target):
         grid = [[0 for x in range(28)] for x in range(30)]
         for cell in self.app.walls:
@@ -140,13 +142,7 @@ class Enemy(pygame.sprite.Sprite):
                                 if next_cell not in visited:
                                     visited.append(next_cell)
                                     queue.append((next_cell, path + [next_cell]))
-        shortest = [target]
-        while target != start:
-            for step in path:
-                if step["Next"] == target:
-                    target = step["Current"]
-                    shortest.insert(0, step["Current"])
-        return shortest
+
 
     def DFS(self, start, target):
         grid = [[0 for x in range(28)] for x in range(30)]
