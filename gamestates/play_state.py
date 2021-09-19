@@ -11,17 +11,6 @@ class Play(GameState):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
-            if event.type == pygame.KEYDOWN:
-                if event.key==pygame.K_z:
-                    self.player.change_algorithm()
-                if event.key == pygame.K_LEFT:
-                    self.player.move(vec(-1, 0))
-                if event.key == pygame.K_RIGHT:
-                    self.player.move(vec(1, 0))
-                if event.key == pygame.K_UP:
-                    self.player.move(vec(0, -1))
-                if event.key == pygame.K_DOWN:
-                    self.player.move(vec(0, 1))
 
     def update(self):
         self.player.update()
@@ -64,8 +53,6 @@ class Play(GameState):
         self.screen.fill(BLACK)
         self.screen.blit(self.maze, (25, 25))
         self.draw_text('Current score: {}'.format(self.player.current_score), self.screen, [60, 0], 18, (255, 255, 255),
-                       'arial black')
-        self.draw_text('Current algorithm: {}'.format(self.player.current_alg+" "+str(self.player.current_time)), self.screen, [300, 0], 18, (255, 255, 255),
                        'arial black')
         self.player.draw(self.screen)
         self.draw_coins()

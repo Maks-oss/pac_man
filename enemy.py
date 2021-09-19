@@ -19,10 +19,11 @@ class Enemy(pygame.sprite.Sprite):
         self.radius = int(self.app.cell_width // 2.3)
         self.direction = vec(0, 0)
         self.target = None
-        self.speed = 2
+        self.speed = 1
 
     def update(self):
-        self.target = self.set_target()
+        # self.target = self.set_target()
+        self.target = self.app.player.grid_pos
         if self.target != self.grid_pos:
             self.pix_pos += self.direction * self.speed
             if self.time_to_move():
@@ -49,10 +50,7 @@ class Enemy(pygame.sprite.Sprite):
             return vec(COLS - 2, ROWS - 2)
 
     def time_to_move(self):
-        if 0 > self.grid_pos[0] > len(self.app.maze_array[0]):
-            return False
-        if 0 > self.grid_pos[1] > len(self.app.maze_array):
-            return False
+
         if int(self.pix_pos.x + 25) % self.app.cell_width == 0:
             if self.direction == vec(1, 0) or self.direction == vec(-1, 0) or self.direction == vec(0, 0):
                 return True
@@ -62,8 +60,18 @@ class Enemy(pygame.sprite.Sprite):
         return False
 
     def move(self):
-        self.direction = self.get_random_direction()
+        self.direction = self.get_path_direction(self.target)
 
+    def get_path_direction(self, target):
+        next_cell = self.find_next_cell_in_path(target)
+        xdir = next_cell[0] - self.grid_pos[0]
+        ydir = next_cell[1] - self.grid_pos[1]
+        return vec(xdir, ydir)
+
+    def find_next_cell_in_path(self, target):
+        path = self.app.graph_alg.UCS([int(self.grid_pos[0]), int(self.grid_pos[1])], [
+            int(target[0]), int(target[1])])
+        return path[1]
     def get_random_direction(self):
         while True:
             number = random.randint(-2, 1)
@@ -85,85 +93,84 @@ class Enemy(pygame.sprite.Sprite):
                    (self.grid_pos[1] * self.app.cell_height) + 25 +
                    self.app.cell_height // 2)
 
-    def UCS(self,start,target):
-        grid = [[0 for x in range(28)] for x in range(30)]
-        for cell in self.app.walls:
-            if cell.x < 28 and cell.y < 30:
-                grid[int(cell.y)][int(cell.x)] = 1
-        queue = PriorityQueue()
-        queue.put((0, [start]))
-        visited=[]
-        # iterate over the items in the queue
-        while not queue.empty():
-            pair = queue.get()
-            current = pair[1][-1]
-            cost=pair[0]
-            if current == target:
-                return pair[1]
-            neighbours = [[int(current[0] + 1), int(current[1])],
-                          [int(current[0] - 1), int(current[1])],
-                          [int(current[0]), int(current[1] + 1)],
-                          [int(current[0]), int(current[1] - 1)]]
-            for neighbour in neighbours:
-                if 0 <= neighbour[0] < len(grid[0]):
-                    if 0 <= neighbour[1] < len(grid):
-                        next_cell = [int(neighbour[0]), int(neighbour[1])]
-                        if grid[int(next_cell[1])][next_cell[0]] != 1 and next_cell not in visited:
-                            visited.append(next_cell)
-                            temp = pair[1][:]
-                            temp.append(next_cell)
-                            queue.put((cost+self.cost_function(next_cell,target), temp))
-
-    def cost_function(self,point, end):
-        return pow(point[0] - end[0], 2) + pow(point[1] - end[1], 2)
-
-    def BFS(self, start, target):
-        grid = [[0 for x in range(28)] for x in range(30)]
-        for cell in self.app.walls:
-            if cell.x < 28 and cell.y < 30:
-                grid[int(cell.y)][int(cell.x)] = 1
-        queue = [(start, [start])]
-        visited = []
-        while queue:
-            (current, path) = queue.pop(0)
-            visited.append(current)
-            neighbours = [[int(current[0] + 1), int(current[1])],
-                          [int(current[0] - 1), int(current[1])],
-                          [int(current[0]), int(current[1] + 1)],
-                          [int(current[0]), int(current[1] - 1)]]
-            for neighbour in neighbours:
-                if 0 <= neighbour[0] < len(grid[0]):
-                    if 0 <= neighbour[1] < len(grid):
-                        next_cell = [int(neighbour[0]), int(neighbour[1])]
-                        if grid[int(next_cell[1])][next_cell[0]] != 1:
-                            if next_cell == target:
-                                return path + [target]
-                            else:
-                                if next_cell not in visited:
-                                    visited.append(next_cell)
-                                    queue.append((next_cell, path + [next_cell]))
-
-
-    def DFS(self, start, target):
-        grid = [[0 for x in range(28)] for x in range(30)]
-        for cell in self.app.walls:
-            if cell.x < 28 and cell.y < 30:
-                grid[int(cell.y)][int(cell.x)] = 1
-        stack = [(start, [start])]
-        visited = []
-        while stack:
-            (current, path) = stack.pop()
-            if current not in visited:
-                if current == target:
-                    return path
-                visited.append(current)
-                neighbours = [[int(current[0] + 1), int(current[1])],
-                              [int(current[0] - 1), int(current[1])],
-                              [int(current[0]), int(current[1] + 1)],
-                              [int(current[0]), int(current[1] - 1)]]
-                for neighbour in neighbours:
-                    if 0 <= neighbour[0] < len(grid[0]):
-                        if 0 <= neighbour[1] < len(grid):
-                            next_cell = [int(neighbour[0]), int(neighbour[1])]
-                            if grid[int(next_cell[1])][next_cell[0]] != 1:
-                                stack.append((next_cell, path + [next_cell]))
+    # def UCS(self,start,target):
+    #     grid = [[0 for x in range(28)] for x in range(30)]
+    #     for cell in self.app.walls:
+    #         if cell.x < 28 and cell.y < 30:
+    #             grid[int(cell.y)][int(cell.x)] = 1
+    #     queue = PriorityQueue()
+    #     queue.put((0, [start]))
+    #     visited=[]
+    #     while not queue.empty():
+    #         pair = queue.get()
+    #         current = pair[1][-1]
+    #         cost=pair[0]
+    #         if current == target:
+    #             return pair[1]
+    #         neighbours = [[int(current[0] + 1), int(current[1])],
+    #                       [int(current[0] - 1), int(current[1])],
+    #                       [int(current[0]), int(current[1] + 1)],
+    #                       [int(current[0]), int(current[1] - 1)]]
+    #         for neighbour in neighbours:
+    #             if 0 <= neighbour[0] < len(grid[0]):
+    #                 if 0 <= neighbour[1] < len(grid):
+    #                     next_cell = [int(neighbour[0]), int(neighbour[1])]
+    #                     if grid[int(next_cell[1])][next_cell[0]] != 1 and next_cell not in visited:
+    #                         visited.append(next_cell)
+    #                         temp = pair[1][:]
+    #                         temp.append(next_cell)
+    #                         queue.put((cost+self.cost_function(next_cell,target), temp))
+    #
+    # def cost_function(self,point, end):
+    #     return pow(point[0] - end[0], 2) + pow(point[1] - end[1], 2)
+    #
+    # def BFS(self, start, target):
+    #     grid = [[0 for x in range(28)] for x in range(30)]
+    #     for cell in self.app.walls:
+    #         if cell.x < 28 and cell.y < 30:
+    #             grid[int(cell.y)][int(cell.x)] = 1
+    #     queue = [(start, [start])]
+    #     visited = []
+    #     while queue:
+    #         (current, path) = queue.pop(0)
+    #         visited.append(current)
+    #         neighbours = [[int(current[0] + 1), int(current[1])],
+    #                       [int(current[0] - 1), int(current[1])],
+    #                       [int(current[0]), int(current[1] + 1)],
+    #                       [int(current[0]), int(current[1] - 1)]]
+    #         for neighbour in neighbours:
+    #             if 0 <= neighbour[0] < len(grid[0]):
+    #                 if 0 <= neighbour[1] < len(grid):
+    #                     next_cell = [int(neighbour[0]), int(neighbour[1])]
+    #                     if grid[int(next_cell[1])][next_cell[0]] != 1:
+    #                         if next_cell == target:
+    #                             return path + [target]
+    #                         else:
+    #                             if next_cell not in visited:
+    #                                 visited.append(next_cell)
+    #                                 queue.append((next_cell, path + [next_cell]))
+    #
+    #
+    # def DFS(self, start, target):
+    #     grid = [[0 for x in range(28)] for x in range(30)]
+    #     for cell in self.app.walls:
+    #         if cell.x < 28 and cell.y < 30:
+    #             grid[int(cell.y)][int(cell.x)] = 1
+    #     stack = [(start, [start])]
+    #     visited = []
+    #     while stack:
+    #         (current, path) = stack.pop()
+    #         if current not in visited:
+    #             if current == target:
+    #                 return path
+    #             visited.append(current)
+    #             neighbours = [[int(current[0] + 1), int(current[1])],
+    #                           [int(current[0] - 1), int(current[1])],
+    #                           [int(current[0]), int(current[1] + 1)],
+    #                           [int(current[0]), int(current[1] - 1)]]
+    #             for neighbour in neighbours:
+    #                 if 0 <= neighbour[0] < len(grid[0]):
+    #                     if 0 <= neighbour[1] < len(grid):
+    #                         next_cell = [int(neighbour[0]), int(neighbour[1])]
+    #                         if grid[int(next_cell[1])][next_cell[0]] != 1:
+    #                             stack.append((next_cell, path + [next_cell]))
