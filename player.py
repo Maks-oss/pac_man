@@ -7,7 +7,7 @@ vec = pygame.math.Vector2
 
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, app, pos):
+    def __init__(self, app, pos,target_point):
         self.app = app
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load('assets/pac.png').convert()
@@ -15,7 +15,7 @@ class Player(pygame.sprite.Sprite):
         self.grid_pos = pos
         self.old_path = []
         self.previous_grid_pos = pos
-
+        self.target_point=target_point
         self.starting_pos = [pos[0], pos[1]]
         self.pix_pos = self.get_pix_pos()
         self.direction = vec(1, 0)
@@ -24,6 +24,9 @@ class Player(pygame.sprite.Sprite):
         self.current_score = 0
         self.speed = 1
         self.lives = 1
+        pygame.draw.circle(self.app.maze, RED,
+                           (int(self.target_point[0] * self.app.cell_width) + self.app.cell_width // 2 + 25,
+                            int(self.target_point[1] * self.app.cell_height) + self.app.cell_width // 2 + 25 ), 5)
 
     def update(self):
         if self.able_to_move:
@@ -71,16 +74,27 @@ class Player(pygame.sprite.Sprite):
         return vec(xdir, ydir)
 
     def find_next_cell_in_path(self, target):
-        path = self.app.graph_alg.UCS([int(self.grid_pos[0]), int(self.grid_pos[1])], [
+        if self.old_path:
+            for p in self.old_path:
+                pygame.draw.rect(self.app.maze, BLACK, p)
+            self.old_path = []
+        print(self.target_point)
+        print(self.app.maze_array[self.target_point[0]][self.target_point[1]])
+        path = self.app.graph_alg.a_star([int(self.grid_pos[0]), int(self.grid_pos[1])], [
             int(target[0]), int(target[1])])
-
+        for p in path:
+            self.old_path.append((p[0] * self.app.cell_width, p[1] * self.app.cell_height,
+                                  self.app.cell_width // 2, self.app.cell_height // 2))
+            pygame.draw.rect(self.app.maze, PLAYER_COLOUR, (p[0] * self.app.cell_width, p[1] * self.app.cell_height,
+                                                          self.app.cell_width // 2, self.app.cell_height // 2))
+        print(path[len(path)-1])
         if len(path) == 1:
             return path[0]
         else:
             return path[1]
 
     def move(self):
-        self.stored_direction = self.get_path_direction(self.app.target_point)
+        self.stored_direction = self.get_path_direction(self.target_point)
 
     def get_pix_pos(self):
         return vec((self.grid_pos[0] * self.app.cell_width) + 25 + self.app.cell_width // 2,

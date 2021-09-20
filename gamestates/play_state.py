@@ -3,7 +3,7 @@ from pygame.math import Vector2 as vec
 
 from gamestates.game_state import GameState
 from gamestates.gameover_state import GameOver
-from utils import BLACK
+from utils import BLACK, RED
 
 
 class Play(GameState):

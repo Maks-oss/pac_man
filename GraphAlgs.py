@@ -30,9 +30,34 @@ class GraphAlgs:
                             temp = pair[1][:]
                             temp.append(next_cell)
                             queue.put((cost+self.cost_function(next_cell,target), temp))
+    def a_star(self,start,target):
+        queue = PriorityQueue()
+        queue.put((0, [start]))
+        visited=[]
+        while not queue.empty():
+            pair = queue.get()
+            current = pair[1][-1]
 
+            if current == target:
+                return pair[1]
+            neighbours = [[int(current[0] + 1), int(current[1])],
+                          [int(current[0] - 1), int(current[1])],
+                          [int(current[0]), int(current[1] + 1)],
+                          [int(current[0]), int(current[1] - 1)]]
+            for neighbour in neighbours:
+                if 0 <= neighbour[0] < len(self.grid[0]):
+                    if 0 <= neighbour[1] < len(self.grid):
+                        next_cell = [int(neighbour[0]), int(neighbour[1])]
+                        if self.grid[int(next_cell[1])][next_cell[0]] != 1 and next_cell not in visited:
+                            visited.append(next_cell)
+                            temp = pair[1][:]
+                            temp.append(next_cell)
+                            queue.put((self.cost_function(next_cell,target)+self.g_function(next_cell,start), temp))
     def cost_function(self,point, end):
         return pow(point[0] - end[0], 2) + pow(point[1] - end[1], 2)
+
+    def g_function(self,point,start):
+        return pow(point[0] - start[0], 2) + pow(point[1] - start[1], 2)
 
     def BFS(self, start, target):
         queue = [(start, [start])]

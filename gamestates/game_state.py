@@ -19,31 +19,30 @@ class GameState(pygame.sprite.Sprite):
         self.cell_height = MAZE_HEIGHT // 30
         self.image = pygame.image.load('assets/stone.png').convert()
         self.image = pygame.transform.scale(self.image, (self.cell_width, self.cell_height))
-        self.target_point = None
         self.maze_array = np.array(self.getArray2d())
         np.random.shuffle(self.maze_array)
         self.transform_maze()
         self.maze = pygame.Surface((MAZE_WIDTH, MAZE_HEIGHT))
         self.draw_maze()
-        self.set_point()
         self.walls = []
         self.coins = []
         self.enemies = []
         self.p_pos = None
         self.e_pos = []
         self.load()
-        self.player = Player(self, self.p_pos)
+        self.set_point()
+        self.player = Player(self, self.p_pos,self.app.target_point)
         self.graph_alg=GraphAlgs(self.walls)
         self.make_enemies()
 
+
     def set_point(self):
         rand_point = [random.randint(0, len(self.maze_array)-1), random.randint(0, len(self.maze_array[0])-1)]
-        if self.maze_array[rand_point[0]][rand_point[1]] == 'C':
-            self.target_point = rand_point
+        if self.maze_array[rand_point[0]][rand_point[1]] == 'C' and self.app.target_point is None:
+            self.app.target_point = rand_point
             print("Random",rand_point)
-            pygame.draw.circle(self.maze, RED,
-                               (int(rand_point[0] * self.cell_width) + self.cell_width // 2 + 25,
-                                int(rand_point[1] * self.cell_height) + self.cell_width // 2 + 25 ), 10)
+        elif self.app.target_point is not None:
+            return
         else:
             self.set_point()
 

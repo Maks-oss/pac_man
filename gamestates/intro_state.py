@@ -10,6 +10,7 @@ class Intro(GameState):
     def __init__(self, screen,app):
         super().__init__(screen,app)
 
+
     def event(self):
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
