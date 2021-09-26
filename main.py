@@ -11,7 +11,6 @@ class App:
     def __init__(self):
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         self.clock = pygame.time.Clock()
-        self.target_point=None
         self.state = Intro(self.screen,self)
 
 

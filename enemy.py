@@ -22,7 +22,6 @@ class Enemy(pygame.sprite.Sprite):
         self.speed = 1
 
     def update(self):
-        # self.target = self.set_target()
         self.target = self.app.player.grid_pos
         if self.target != self.grid_pos:
             self.pix_pos += self.direction * self.speed
@@ -37,17 +36,6 @@ class Enemy(pygame.sprite.Sprite):
     def draw(self, screen):
         screen.blit(self.image, (self.pix_pos.x - 10,
                                  self.pix_pos.y - 10))
-
-    def set_target(self):
-
-        if self.app.player.grid_pos[0] > COLS // 2 and self.app.player.grid_pos[1] > ROWS // 2:
-            return vec(1, 1)
-        if self.app.player.grid_pos[0] > COLS // 2 and self.app.player.grid_pos[1] < ROWS // 2:
-            return vec(1, ROWS - 2)
-        if self.app.player.grid_pos[0] < COLS // 2 and self.app.player.grid_pos[1] > ROWS // 2:
-            return vec(COLS - 2, 1)
-        else:
-            return vec(COLS - 2, ROWS - 2)
 
     def time_to_move(self):
 
@@ -69,9 +57,19 @@ class Enemy(pygame.sprite.Sprite):
         return vec(xdir, ydir)
 
     def find_next_cell_in_path(self, target):
-        path = self.app.graph_alg.UCS([int(self.grid_pos[0]), int(self.grid_pos[1])], [
-            int(target[0]), int(target[1])])
+        global path
+        if self.app.player.current_alg == 'DFS':
+            path = self.app.graph_alg.DFS([int(self.grid_pos[0]), int(self.grid_pos[1])], [
+                int(target[0]), int(target[1])])
+        elif self.app.player.current_alg == 'BFS':
+            path = self.app.graph_alg.BFS([int(self.grid_pos[0]), int(self.grid_pos[1])], [
+                int(target[0]), int(target[1])])
+        elif self.app.player.current_alg == 'UCS':
+            path = self.app.graph_alg.UCS([int(self.grid_pos[0]), int(self.grid_pos[1])], [
+                int(target[0]), int(target[1])])
+
         return path[1]
+
     def get_random_direction(self):
         while True:
             number = random.randint(-2, 1)
