@@ -23,9 +23,8 @@ class Player(pygame.sprite.Sprite):
         # self.stored_direction = None
         self.able_to_move = True
         self.current_score = 0
-        self.speed = 1
+        self.speed = 2
         self.lives = 1
-        self.current_pos = 1
 
     def update(self):
         if self.able_to_move:
@@ -102,7 +101,6 @@ class Player(pygame.sprite.Sprite):
 
     def move(self):
         self.direction = self.get_path_direction(self.app.target_point)
-        self.current_pos += 1
 
     def get_pix_pos(self):
         return vec((self.grid_pos[0] * self.app.cell_width) + 25 + self.app.cell_width // 2,

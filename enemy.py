@@ -7,13 +7,13 @@ from utils import *
 
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, app, pos, color):
+    def __init__(self, app, pos, type):
         self.app = app
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load('assets/blinky.png').convert()
         self.image = pygame.transform.scale(self.image, (self.app.cell_width, self.app.cell_height))
         self.grid_pos = pos
-        self.color = color
+        self.type = type
         self.starting_pos = [pos[0], pos[1]]
         self.pix_pos = self.get_pix_pos()
         self.radius = int(self.app.cell_width // 2.3)
@@ -38,7 +38,6 @@ class Enemy(pygame.sprite.Sprite):
                                  self.pix_pos.y - 10))
 
     def time_to_move(self):
-
         if int(self.pix_pos.x + 25) % self.app.cell_width == 0:
             if self.direction == vec(1, 0) or self.direction == vec(-1, 0) or self.direction == vec(0, 0):
                 return True
@@ -48,7 +47,10 @@ class Enemy(pygame.sprite.Sprite):
         return False
 
     def move(self):
-        self.direction = self.get_path_direction(self.target)
+        if self.type=='random':
+            self.direction = self.get_random_direction()
+        else:
+            self.direction = self.get_path_direction(self.target)
 
     def get_path_direction(self, target):
         next_cell = self.find_next_cell_in_path(target)

@@ -35,8 +35,8 @@ class Play(GameState):
     def draw_bfs(self):
         for enemy in self.enemies:
             for p in enemy.BFS(enemy.grid_pos, self.player.grid_pos):
-                pygame.draw.rect(self.maze, enemy.color, (p[0] * self.cell_width, p[1] * self.cell_height,
-                                                          self.cell_width // 2, self.cell_height // 2))
+                pygame.draw.rect(self.maze, enemy.type, (p[0] * self.cell_width, p[1] * self.cell_height,
+                                                         self.cell_width // 2, self.cell_height // 2))
 
     def draw_coins(self):
         for coin in self.coins:
@@ -81,9 +81,9 @@ class Play(GameState):
     def make_enemies(self):
         for idx, pos in enumerate(self.e_pos):
             if idx == 0:
-                self.enemies.append(Enemy(self, pos, RED))
+                self.enemies.append(Enemy(self, pos, 'random'))
             if idx == 1:
-                self.enemies.append(Enemy(self, pos, BLUE_LIGHT))
+                self.enemies.append(Enemy(self, pos, 'speed'))
             # if idx == 2:
             #     self.enemies.append(Enemy(self, pos, PLAYER_COLOUR))
             # if idx == 3:
