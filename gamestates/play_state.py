@@ -1,9 +1,10 @@
 import random
+import time
 
-import pygame
-from pygame.math import Vector2 as vec
 import numpy as np
-from GraphAlgs import GraphAlgs
+import pygame
+
+from algs.GraphAlgs import GraphAlgs
 from enemy import Enemy
 from gamestates.game_state import GameState
 from gamestates.gameover_state import GameOver
@@ -19,9 +20,14 @@ class Play(GameState):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_z:
                     self.player.change_algorithm()
+                if event.key == pygame.K_x:
+                    self.player.change_agent()
 
     def update(self):
         self.player.update()
+        if self.player.current_score == 70:
+            self.app.state = GameOver(self.screen, self.app, is_won=True, time=(time.time() - self.timer),
+                                      agent=self.player.current_agent)
         for enemy in self.enemies:
             enemy.update()
         for enemy in self.enemies:
@@ -47,7 +53,8 @@ class Play(GameState):
     def remove_life(self):
         self.player.lives -= 1
         if self.player.lives == 0:
-            self.app.state = GameOver(self.screen, self.app)
+            self.app.state = GameOver(self.screen, self.app, is_won=False, time=(time.time() - self.timer),
+                                      agent=self.player.current_agent)
         else:
             self.player.grid_pos = vec(self.player.starting_pos)
             self.player.pix_pos = self.player.get_pix_pos()
@@ -124,7 +131,7 @@ class Play(GameState):
         self.screen.blit(self.maze, (25, 25))
         self.draw_text('Current score: {}'.format(self.player.current_score), self.screen, [60, 0], 18, (255, 255, 255),
                        'arial black')
-        self.draw_text('Current algorithm: {}'.format(self.player.current_alg), self.screen, [300, 0], 18,
+        self.draw_text('Current agent: {}'.format(self.player.current_agent), self.screen, [300, 0], 18,
                        (255, 255, 255),
                        'arial black')
         self.player.draw(self.screen)
@@ -133,10 +140,15 @@ class Play(GameState):
         for enemy in self.enemies:
             enemy.draw(self.screen)
         pygame.display.update()
+
     def draw_point(self):
         pygame.draw.circle(self.screen, RED,
-                           (int(self.target_point[0] * self.cell_width)+ self.cell_width // 2 + 25,
-                            int(self.target_point[1] * self.cell_height)+ self.cell_height // 2 + 25), 8)
+                           (int(self.target_point[0] * self.cell_width) + self.cell_width // 2 + 25,
+                            int(self.target_point[1] * self.cell_height) + self.cell_height // 2 + 25), 8)
+
+    # def generate_newstate(self):
+    #
+
     def __init__(self, screen, app):
         super().__init__(screen, app)
         self.cell_width = MAZE_WIDTH // 28
@@ -152,6 +164,8 @@ class Play(GameState):
         self.coins = []
         self.enemies = []
         self.p_pos = None
+        self.is_win = False
+        self.is_lose = False
         self.e_pos = []
         self.load()
         self.target_point = None
@@ -159,3 +173,4 @@ class Play(GameState):
         self.set_point()
         self.player = Player(self, self.p_pos)
         self.make_enemies()
+        self.timer = time.time()

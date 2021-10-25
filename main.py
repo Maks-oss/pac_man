@@ -2,6 +2,7 @@ import sys
 
 from gamestates.game_state import *
 from gamestates.intro_state import Intro
+from utils import *
 
 pygame.init()
 vec = pygame.math.Vector2

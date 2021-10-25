@@ -1,8 +1,8 @@
-import random
-
 import pygame
 
+from algs import MultiAgentAlgs as agent
 from utils import *
+from gamestates import gameover_state
 
 vec = pygame.math.Vector2
 
@@ -17,6 +17,8 @@ class Player(pygame.sprite.Sprite):
         self.old_path = []
         self.previous_grid_pos = pos
         self.current_alg = 'UCS'
+        self.reflex_agent = None
+        self.current_agent = 'MinMax'
         self.starting_pos = [pos[0], pos[1]]
         self.pix_pos = self.get_pix_pos()
         self.direction = vec(1, 0)
@@ -24,6 +26,7 @@ class Player(pygame.sprite.Sprite):
         self.able_to_move = True
         self.current_score = 0
         self.speed = 2
+        self.explored = []
         self.lives = 1
 
     def update(self):
@@ -62,6 +65,31 @@ class Player(pygame.sprite.Sprite):
                     return True
         return False
 
+    def change_agent(self):
+        if self.current_agent == 'MinMax':
+            self.current_agent = 'AlphaBeta'
+        elif self.current_agent == 'AlphaBeta':
+            self.current_agent = 'ExpectMax'
+        elif self.current_agent == 'ExpectMax':
+            self.current_agent = 'MinMax'
+
+    def apply_agent(self):
+        if self.current_agent == 'MinMax':
+            self.reflex_agent = agent.MinimaxAgent(self.grid_pos,
+                                                      (self.app.enemies[0].grid_pos, self.app.enemies[1].grid_pos),
+                                                      self.app.coins, self.current_score, self.lives,
+                                                      self.app.maze_array)
+        elif self.current_agent == 'AlphaBeta':
+            self.reflex_agent = agent.AlphaBetaAgent(self.grid_pos,
+                                                      (self.app.enemies[0].grid_pos, self.app.enemies[1].grid_pos),
+                                                      self.app.coins, self.current_score, self.lives,
+                                                      self.app.maze_array)
+        elif self.current_agent == 'ExpectMax':
+            self.reflex_agent = agent.ExpectimaxAgent(self.grid_pos,
+                                                      (self.app.enemies[0].grid_pos, self.app.enemies[1].grid_pos),
+                                                      self.app.coins, self.current_score, self.lives,
+                                                      self.app.maze_array)
+
     def change_algorithm(self):
         if self.current_alg == 'DFS':
             self.current_alg = 'BFS'
@@ -81,26 +109,38 @@ class Player(pygame.sprite.Sprite):
         # print("direction:",vec(xdir,ydir))
         return vec(xdir, ydir)
 
+    def get_minimax_direction(self):
+        self.apply_agent()
+        next_cell = self.reflex_agent.action()
+        # print("Minimax move", next_cell)
+        xdir = next_cell[0] - self.grid_pos[0]
+        ydir = next_cell[1] - self.grid_pos[1]
+        # print("direction:",vec(xdir,ydir))
+        return vec(xdir, ydir)
+
     def find_next_cell_in_path(self, target):
         if self.old_path:
             for p in self.old_path:
                 pygame.draw.rect(self.app.maze, BLACK, p)
             self.old_path = []
         # print("Target ",self.app.target_point,"Player pos: ",self.grid_pos)
-        path = self.app.graph_alg.a_star(self.grid_pos,target)
+        path = self.app.graph_alg.a_star(self.grid_pos, target)
         # print(path)
         for p in path:
             self.old_path.append((p[0] * self.app.cell_width, p[1] * self.app.cell_height,
                                   self.app.cell_width // 2, self.app.cell_height // 2))
             pygame.draw.rect(self.app.maze, PLAYER_COLOUR, (p[0] * self.app.cell_width, p[1] * self.app.cell_height,
                                                             self.app.cell_width // 2, self.app.cell_height // 2))
-        if len(path)==1:
+        if len(path) == 1:
             return path[0]
         else:
             return path[1]
 
     def move(self):
-        self.direction = self.get_path_direction(self.app.target_point)
+        # pass
+        # self.get_minimax_direction()
+        # self.direction = self.get_path_direction(self.app.target_point)
+        self.direction = self.get_minimax_direction()
 
     def get_pix_pos(self):
         return vec((self.grid_pos[0] * self.app.cell_width) + 25 + self.app.cell_width // 2,

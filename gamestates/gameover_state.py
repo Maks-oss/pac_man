@@ -1,15 +1,20 @@
+import csv
+
 import pygame
 
+import gamestates.play_state as play_state
 from buttons import button
 from gamestates.game_state import GameState
-import gamestates.play_state as play_state
 from utils import WIDTH, BLACK, HEIGHT, RED
 
 
 class GameOver(GameState):
 
-    def __init__(self, screen, app):
+    def __init__(self, screen, app, is_won, time, agent):
         super().__init__(screen, app)
+        with open('results.csv', 'w', encoding='UTF8') as f:
+            writer = csv.writer(f)
+            writer.writerow(["Win" if is_won else "Lose", time, agent])
 
     def event(self):
         for event in pygame.event.get():
