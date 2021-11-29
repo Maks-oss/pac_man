@@ -47,7 +47,7 @@ class Enemy(pygame.sprite.Sprite):
         return False
 
     def move(self):
-        if self.type=='random':
+        if self.type == 'random':
             self.direction = self.get_random_direction()
         else:
             self.direction = self.get_path_direction(self.target)

@@ -7,15 +7,14 @@ from utils import WIDTH, HEIGHT
 
 
 class Intro(GameState):
-    def __init__(self, screen,app):
-        super().__init__(screen,app)
-
+    def __init__(self, screen, app):
+        super().__init__(screen, app)
 
     def event(self):
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.button1.collidepoint(pygame.mouse.get_pos()):
-                    self.app.state = Play(self.screen,self.app)
+                    self.app.state = Play(self.screen, self.app)
                 elif self.button2.collidepoint(pygame.mouse.get_pos()):
                     pygame.quit()
             if event.type == pygame.QUIT:

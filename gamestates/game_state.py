@@ -23,8 +23,6 @@ class GameState:
         # self.e_pos = []
         # self.load()
 
-
-
     def event(self):
         pass
 
@@ -42,5 +40,3 @@ class GameState:
             pos[0] = pos[0] - text_size[0] // 2
             pos[1] = pos[1] - text_size[1] // 2
         screen.blit(text, pos)
-
-

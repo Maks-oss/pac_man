@@ -18,8 +18,8 @@ class Play(GameState):
             if event.type == pygame.QUIT:
                 self.running = False
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_z:
-                    self.player.change_algorithm()
+                # if event.key == pygame.K_z:
+                #     self.player.change_algorithm()
                 if event.key == pygame.K_x:
                     self.player.change_agent()
 
@@ -27,7 +27,8 @@ class Play(GameState):
         self.player.update()
         if self.player.current_score == 70:
             self.app.state = GameOver(self.screen, self.app, is_won=True, time=(time.time() - self.timer),
-                                      agent=self.player.current_agent)
+                                      score=self.player.current_score,
+                                      )
         for enemy in self.enemies:
             enemy.update()
         for enemy in self.enemies:
@@ -47,14 +48,15 @@ class Play(GameState):
     def draw_coins(self):
         for coin in self.coins:
             pygame.draw.circle(self.screen, (124, 123, 7),
-                               (int(coin.x * self.cell_width) + self.cell_width // 2 + 25,
-                                int(coin.y * self.cell_height) + self.cell_height // 2 + 25), 5)
+                               (int(coin[0] * self.cell_width) + self.cell_width // 2 + 25,
+                                int(coin[1] * self.cell_height) + self.cell_height // 2 + 25), 5)
 
     def remove_life(self):
         self.player.lives -= 1
         if self.player.lives == 0:
             self.app.state = GameOver(self.screen, self.app, is_won=False, time=(time.time() - self.timer),
-                                      agent=self.player.current_agent)
+                                      score=self.player.current_score,
+                                      )
         else:
             self.player.grid_pos = vec(self.player.starting_pos)
             self.player.pix_pos = self.player.get_pix_pos()
@@ -75,7 +77,7 @@ class Play(GameState):
             self.maze_array[2] = self.maze_array[2][:2] + 'P' + self.maze_array[2][2:]
 
     def getArray2d(self):
-        with open('walls.txt', mode='r') as file:
+        with open('walls2.txt', mode='r') as file:
             return [row.rstrip('\n') for row in file.readlines()]
 
     def draw_maze(self):
@@ -84,17 +86,20 @@ class Play(GameState):
                 if j == "1":
                     pygame.draw.rect(self.maze, BLUE, (yid * self.cell_width, xid * self.cell_height,
                                                        self.cell_width, self.cell_height))
+                elif j == 'P':
+                    pygame.draw.rect(self.maze, BLACK, (yid * self.cell_width, xid * self.cell_height,
+                                                        self.cell_width, self.cell_height))
 
     def make_enemies(self):
         for idx, pos in enumerate(self.e_pos):
-            if idx == 0:
-                self.enemies.append(Enemy(self, pos, 'random'))
-            if idx == 1:
-                self.enemies.append(Enemy(self, pos, 'speed'))
-            # if idx == 2:
-            #     self.enemies.append(Enemy(self, pos, PLAYER_COLOUR))
-            # if idx == 3:
-            #     self.enemies.append(Enemy(self, pos, GREY))
+            # if idx == 0:
+            #     self.enemies.append(Enemy(self, pos, 'random'))
+            # if idx == 1:
+            self.enemies.append(Enemy(self, pos, 'speed'))
+        # if idx == 2:
+        #     self.enemies.append(Enemy(self, pos, PLAYER_COLOUR))
+        # if idx == 3:
+        #     self.enemies.append(Enemy(self, pos, GREY))
 
     def load(self):
         for xid, lines in enumerate(self.maze_array):
@@ -126,6 +131,17 @@ class Play(GameState):
         else:
             self.set_point()
 
+    def set_agent(self, agent):
+        rand_point = [random.randint(0, len(self.maze_array) - 1), random.randint(0, len(self.maze_array[0]) - 1)]
+        if self.maze_array[rand_point[0]][rand_point[1]] == 'C':
+            self.maze_array[rand_point[0]] = self.maze_array[rand_point[0]][:rand_point[1]] + agent + self.maze_array[
+                                                                                                          rand_point[
+                                                                                                              0]][
+                                                                                                      rand_point[
+                                                                                                          1] + 1:]
+        else:
+            self.set_agent(agent)
+
     def draw(self):
         self.screen.fill(BLACK)
         self.screen.blit(self.maze, (25, 25))
@@ -156,8 +172,11 @@ class Play(GameState):
         self.image = pygame.image.load('assets/stone.png').convert()
         self.image = pygame.transform.scale(self.image, (self.cell_width, self.cell_height))
         self.maze_array = np.array(self.getArray2d())
-        np.random.shuffle(self.maze_array)
-        self.transform_maze()
+        self.set_agent('P')
+        self.set_agent('2')
+        self.set_agent('3')
+        # np.random.shuffle(self.maze_array)
+        # self.transform_maze()
         self.maze = pygame.Surface((MAZE_WIDTH, MAZE_HEIGHT))
         self.draw_maze()
         self.walls = []

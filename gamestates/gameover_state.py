@@ -10,11 +10,11 @@ from utils import WIDTH, BLACK, HEIGHT, RED
 
 class GameOver(GameState):
 
-    def __init__(self, screen, app, is_won, time, agent):
+    def __init__(self, screen, app, is_won, time, score):
         super().__init__(screen, app)
-        with open('results.csv', 'w', encoding='UTF8') as f:
+        with open('results.csv', 'a', encoding='UTF8') as f:
             writer = csv.writer(f)
-            writer.writerow(["Win" if is_won else "Lose", time, agent])
+            writer.writerow([1 if is_won else 0, time, score])
 
     def event(self):
         for event in pygame.event.get():

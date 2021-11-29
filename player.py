@@ -76,14 +76,14 @@ class Player(pygame.sprite.Sprite):
     def apply_agent(self):
         if self.current_agent == 'MinMax':
             self.reflex_agent = agent.MinimaxAgent(self.grid_pos,
-                                                      (self.app.enemies[0].grid_pos, self.app.enemies[1].grid_pos),
-                                                      self.app.coins, self.current_score, self.lives,
-                                                      self.app.maze_array)
+                                                   (self.app.enemies[0].grid_pos, self.app.enemies[1].grid_pos),
+                                                   self.app.coins, self.current_score, self.lives,
+                                                   self.app.maze_array)
         elif self.current_agent == 'AlphaBeta':
             self.reflex_agent = agent.AlphaBetaAgent(self.grid_pos,
-                                                      (self.app.enemies[0].grid_pos, self.app.enemies[1].grid_pos),
-                                                      self.app.coins, self.current_score, self.lives,
-                                                      self.app.maze_array)
+                                                     (self.app.enemies[0].grid_pos, self.app.enemies[1].grid_pos),
+                                                     self.app.coins, self.current_score, self.lives,
+                                                     self.app.maze_array)
         elif self.current_agent == 'ExpectMax':
             self.reflex_agent = agent.ExpectimaxAgent(self.grid_pos,
                                                       (self.app.enemies[0].grid_pos, self.app.enemies[1].grid_pos),

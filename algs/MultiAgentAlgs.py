@@ -1,5 +1,4 @@
-import math
-import random
+import greetings
 
 
 def manhattanDistance(xy1, xy2):
@@ -11,8 +10,8 @@ def evaluation_function(player_pos, enemy_pos, coins, game_score):
     score = 0.0
     for enemy in enemy_pos:
         manhattan_distance = manhattanDistance(player_pos, enemy)
-        score = 0 if manhattan_distance == 0 else math.log2(manhattan_distance)
-
+        score += manhattan_distance
+        # score = 0 if manhattan_distance == 0 else math.log2(manhattan_distance)
     for coin in coins:
         if [player_pos[0] + 1, player_pos[1]] == coin:
             score += 5
@@ -64,7 +63,7 @@ class AlphaBetaAgent(ReflexAgent):
                       [int(self.enemy_pos[agent - 1][0]), int(self.enemy_pos[agent - 1][1] - 1)]]
         actions = self.get_possible_moves(neighbours=neighbours)
         scores = []
-        min_score = math.inf
+        min_score = greetings.inf
         for action in actions:
             self.enemy_pos[agent - 1] = action
             if agent == 2:
@@ -78,13 +77,20 @@ class AlphaBetaAgent(ReflexAgent):
                 break
 
         min_indexes = [i for i, score in enumerate(scores) if score == min_score]
-        chosen_action = actions[random.choice(min_indexes)]
+        best_score = -9999
+        best_move = -1
+        for i in min_indexes:
+            score = evaluation_function(actions[i], self.enemy_pos, self.coin_pos, self.score)
+            if score > best_score:
+                best_score = score
+                best_move = i
+        chosen_action = actions[best_move]
 
         return min_score, chosen_action
 
-    def alphabeta(self, depth, alpha=-math.inf, beta=math.inf, agent=0, maximizing=True):
+    def alphabeta(self, depth, alpha=-greetings.inf, beta=greetings.inf, agent=0, maximizing=True):
         if depth == 0 or self.is_win() or self.is_lose():
-            return evaluation_function(self.player_pos, self.enemy_pos, self.coin_pos, self.score),None
+            return evaluation_function(self.player_pos, self.enemy_pos, self.coin_pos, self.score), None
         if maximizing:
             return self.maximizer(depth, agent, alpha, beta)
         else:
@@ -98,7 +104,7 @@ class AlphaBetaAgent(ReflexAgent):
         actions = self.get_possible_moves(neighbours=neighbours)
         scores = []
 
-        max_score = -math.inf
+        max_score = -greetings.inf
         for action in actions:
             self.player_pos = action
             scores.append(self.alphabeta(depth, agent=agent + 1, maximizing=False)[0])
@@ -109,7 +115,14 @@ class AlphaBetaAgent(ReflexAgent):
                 break
 
         max_indexes = [i for i, score in enumerate(scores) if score == max_score]
-        chosen_action = actions[random.choice(max_indexes)]
+        best_score = -9999
+        best_move = -1
+        for i in max_indexes:
+            score = evaluation_function(actions[i], self.enemy_pos, self.coin_pos, self.score)
+            if score > best_score:
+                best_score = score
+                best_move = i
+        chosen_action = actions[best_move]
 
         return max_score, chosen_action
 
@@ -132,10 +145,18 @@ class MinimaxAgent(ReflexAgent):
                 scores.append(self.minimax(depth - 1, agent=0, maximizing=True)[0])
             else:
                 scores.append(self.minimax(depth, agent=agent + 1, maximizing=False)[0])
-        print("Scores",scores)
+        # print("Scores", scores)
         min_score = min(scores)
         min_indexes = [i for i, score in enumerate(scores) if score == min_score]
-        chosen_action = actions[random.choice(min_indexes)]
+        best_score = -9999
+        best_move = -1
+        for i in min_indexes:
+            score = evaluation_function(actions[i], self.enemy_pos, self.coin_pos, self.score)
+            if score > best_score:
+                best_score = score
+                best_move = i
+
+        chosen_action = actions[best_move]
 
         return min_score, chosen_action
 
@@ -154,14 +175,20 @@ class MinimaxAgent(ReflexAgent):
                       [int(self.player_pos[0]), int(self.player_pos[1] - 1)]]
         actions = self.get_possible_moves(neighbours=neighbours)
         scores = []
-
         for action in actions:
             self.player_pos = action
             scores.append(self.minimax(depth, agent=agent + 1, maximizing=False)[0])
 
         max_score = max(scores)
         max_indexes = [i for i, score in enumerate(scores) if score == max_score]
-        chosen_action = actions[random.choice(max_indexes)]
+        best_score = -9999
+        best_move = -1
+        for i in max_indexes:
+            score = evaluation_function(actions[i], self.enemy_pos, self.coin_pos, self.score)
+            if score > best_score:
+                best_score = score
+                best_move = i
+        chosen_action = actions[best_move]
 
         return max_score, chosen_action
 
@@ -178,23 +205,29 @@ class ExpectimaxAgent(ReflexAgent):
                       [int(self.enemy_pos[agent - 1][0]), int(self.enemy_pos[agent - 1][1] - 1)]]
         actions = self.get_possible_moves(neighbours=neighbours)
         scores = []
-        # print(actions)
-        prob=1.0/len(actions)
+        prob = 1.0 / len(actions)
         for action in actions:
             self.enemy_pos[agent - 1] = action
             if agent == 2:
                 scores.append(self.expectimax(depth - 1, agent=0, maximizing=True)[0])
             else:
-                scores.append(self.expectimax(depth, agent=agent + 1, maximizing=False)[0]*prob)
+                scores.append(self.expectimax(depth, agent=agent + 1, maximizing=False)[0] * prob)
         min_score = min(scores)
         min_indexes = [i for i, score in enumerate(scores) if score == min_score]
-        chosen_action = actions[random.choice(min_indexes)]
+        best_score = -9999
+        best_move = -1
+        for i in min_indexes:
+            score = evaluation_function(actions[i], self.enemy_pos, self.coin_pos, self.score)
+            if score > best_score:
+                best_score = score
+                best_move = i
+        chosen_action = actions[best_move]
 
         return min_score, chosen_action
 
     def expectimax(self, depth, agent=0, maximizing=True):
         if depth == 0 or self.is_win() or self.is_lose():
-            return evaluation_function(self.player_pos, self.enemy_pos, self.coin_pos, self.score),None
+            return evaluation_function(self.player_pos, self.enemy_pos, self.coin_pos, self.score), None
         if maximizing:
             return self.maximizer(depth, agent)
         else:
@@ -214,11 +247,17 @@ class ExpectimaxAgent(ReflexAgent):
 
         max_score = max(scores)
         max_indexes = [i for i, score in enumerate(scores) if score == max_score]
-        chosen_action = actions[random.choice(max_indexes)]
-
+        best_score = -9999
+        best_move = -1
+        for i in max_indexes:
+            score = evaluation_function(actions[i], self.enemy_pos, self.coin_pos, self.score)
+            if score > best_score:
+                best_score = score
+                best_move = i
+        chosen_action = actions[best_move]
         return max_score, chosen_action
 
     def action(self):
         # scores = self.expectimax(2)
         # print("Scores",scores)
-        return self.expectimax(2)[1]
+        return self.expectimax(1)[1]
